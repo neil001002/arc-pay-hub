@@ -5,7 +5,7 @@ import { reownProjectId } from './wallet-options';
 
 export function createWalletKit() {
   if (!reownProjectId) return null;
-  const adapter = new WagmiAdapter({ networks: [arc], projectId: reownProjectId, ssr: true });
+  const adapter = Object.assign(new WagmiAdapter({ networks: [arc], projectId: reownProjectId, ssr: true }), { namespace: 'eip155' as const });
   const kit = createAppKit({
     adapters: [adapter], networks: [arc], defaultNetwork: arc, projectId: reownProjectId,
     metadata: { name: 'FreelancePay on Arc', description: 'Freelancer USDC payments on Arc Testnet', url: window.location.origin, icons: [`${window.location.origin}/favicon.svg`] },
