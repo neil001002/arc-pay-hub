@@ -1,4 +1,5 @@
 # FreelancePay
+- [ ] Fix wallet context identity during hot updates and verify pages plus wallet dialog.
 - [x] Restore the missing Circle test client key environment prefix and add regression tests.
 - [x] Replace opaque Circle connection errors with an actionable message identifying the current domain.
 - [ ] Clear Circle’s remaining HTTP 401 rejection — corrected full key still rejected; requires checking its active status and matching Web/Passkey domains in Circle Console or supplying a replacement public Client Key.

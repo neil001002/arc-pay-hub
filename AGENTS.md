@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture
+- Keep wallet context identity in a separate non-component module; component hot updates must not replace the context shared by the provider and its consumers.
 - Keep TanStack Start file routes and TypeScript instead of Next.js; the hosted runtime supports this framework.
 - Use Reown AppKit's wagmi adapter for external wallets, with injected fallback when unconfigured; use Circle modular passkey wallets for embedded accounts, so users retain custody and payments remain onchain without an app database.
 - Keep public wallet-provider configuration in the browser-safe wallet options module with environment overrides; never place private provider API keys there.
