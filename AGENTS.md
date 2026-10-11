@@ -15,3 +15,5 @@
 - Keep demo activity explicitly labeled and separate from connected-wallet onchain reads; sample data must never be presented as real funds or confirmations.
 - Place Arc public configuration and ABIs in shared browser-safe modules; private deployer keys belong only to local deployment scripts.
 - Use a deployed vault with a configured Uniswap-V2-compatible router for conversions; StableFX is a permissioned RFQ service, not a generic swap router.
+- Keep conversion minimum output and expiry in caller-signed calldata; immutable token/router configuration and exact balance checks prevent silent underdelivery.
+- Compile and exercise Solidity through local-only solc and Ganache tooling; never import deployment or test tooling into the app runtime.
