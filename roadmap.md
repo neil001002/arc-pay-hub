@@ -1,4 +1,5 @@
 # FreelancePay
+- [ ] Strengthen Arc contracts with caller-set conversion limits and add executable contract tests and deployment checks.
 - [x] Build overview, dashboard, payment links, wallet connection, balances, and activity.
 - [x] Add Arc configuration, real-transfer code, and guarded FX conversion.
 - [x] Add vault contract, deployment script, setup documentation, and rule tests.
