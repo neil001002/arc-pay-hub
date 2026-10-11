@@ -1,5 +1,5 @@
 # FreelancePay
-- [ ] Fix generated payment links being rejected on the client page and verify copied/opened links.
+- [x] Fix generated payment links being rejected on the client page; 20 tests pass and browser checks verify copied/opened and existing links, with malformed recipients still rejected.
 - [x] Diagnose repeated Circle failure after console setup; latest requests show duplicate/invalid usernames, now classified with registration validation; 16 tests and browser checks pass.
 - [x] Stabilize wallet context identity during hot updates; pages and wallet dialog verified without runtime errors, regression tests pass.
 - [x] Restore the missing Circle test client key environment prefix and add regression tests.
