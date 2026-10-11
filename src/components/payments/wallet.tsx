@@ -119,7 +119,7 @@ export function WalletProvider({children}:{children:ReactNode}) { const state=us
 export function useWallet(){const context=useContext(WalletContext);if(!context)throw new Error('Wallet provider is missing');return context;}
 export function WalletButton(){const w=useWallet();return <Button variant="outline" onClick={()=>w.setModal(true)} className="h-10"><Wallet/>{w.address?shortAddress(w.address):'Connect wallet'}</Button>;}
 function WalletDialog(){
- const w=useWallet(); const [username,setUsername]=useState('');
+  const w=useWallet(); const [username,setUsername]=useState(""); useEffect(() => { if (w.modal) { void import("@/lib/circle-wallet"); } }, [w.modal]);
  if(!w.modal)return null;
  return <div className="dialog-backdrop" onClick={()=>w.setModal(false)}><div className="dialog-panel max-h-[90dvh] overflow-y-auto" role="dialog" aria-modal="true" aria-label="Connect wallet" onClick={e=>e.stopPropagation()}>
  <div className="flex justify-between items-center mb-6"><div className="brand-mark"><Wallet size={18}/></div><Button variant="ghost" size="icon" aria-label="Close wallet dialog" onClick={()=>w.setModal(false)}><X/></Button></div>
