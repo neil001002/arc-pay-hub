@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { before, after, test } from 'node:test';
 import ganache from 'ganache';
 import { createPublicClient, createWalletClient, custom, zeroAddress, parseEventLogs } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import { compileContracts } from './compile-vault.mjs';
 
 let provider, client, wallet, payer, recipient, tokens, router, vault, contracts;
@@ -10,13 +11,14 @@ before(async () => {
   contracts = compileContracts({ 'Mocks.sol': { content: readFileSync('contracts/test/Mocks.sol', 'utf8') } });
   provider = ganache.provider({ logging: { quiet: true }, chain: { hardfork: 'shanghai' }, wallet: { totalAccounts: 2 } });
   client = createPublicClient({ transport: custom(provider) });
-  wallet = createWalletClient({ transport: custom(provider) });
-  [payer, recipient] = await wallet.getAddresses();
+  [payer, recipient] = await provider.request({ method: 'eth_accounts', params: [] });
+  const account = privateKeyToAccount(provider.getInitialAccounts()[payer].secretKey);
+  wallet = createWalletClient({ account, transport: custom(provider) });
 });
 after(async () => { await provider?.disconnect(); });
 
 async function deploy(artifact, args = []) {
-  const hash = await wallet.deployContract({ account: payer, chain: null, abi: artifact.abi, bytecode: `0x${artifact.evm.bytecode.object}`, args });
+  const hash = await wallet.deployContract({ chain: null, abi: artifact.abi, bytecode: `0x${artifact.evm.bytecode.object}`, args });
   const receipt = await client.waitForTransactionReceipt({ hash });
   assert.equal(receipt.status, 'success');
   assert.ok(receipt.contractAddress);
@@ -24,7 +26,7 @@ async function deploy(artifact, args = []) {
 }
 async function write(contract, functionName, args = []) {
   const request = await client.simulateContract({ ...contract, account: payer, functionName, args });
-  const hash = await wallet.writeContract({ ...request.request, chain: null });
+  const hash = await wallet.writeContract({ ...request.request, account: wallet.account, chain: null });
   const receipt = await client.waitForTransactionReceipt({ hash });
   assert.equal(receipt.status, 'success');
   return receipt;
@@ -99,7 +101,7 @@ test('blocks router reentry during conversion', async () => {
 });
 test('constructor rejects zero addresses, identical tokens and noncontracts', async () => {
   await fixture();
-  for (const [args, reason] of [
+  for (const [args] of [
     [[zeroAddress, tokens[1].address, router.address], 'Zero address'],
     [[tokens[0].address, tokens[0].address, router.address], 'Identical tokens'],
     [[tokens[0].address, tokens[1].address, recipient], 'Contract required'],
