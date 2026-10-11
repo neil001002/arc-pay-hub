@@ -1,4 +1,7 @@
 # FreelancePay
+- [x] Restore the missing Circle test client key environment prefix and add regression tests.
+- [x] Replace opaque Circle connection errors with an actionable message identifying the current domain.
+- [ ] Clear Circle’s remaining HTTP 401 rejection — corrected full key still rejected; requires checking its active status and matching Web/Passkey domains in Circle Console or supplying a replacement public Client Key.
 - [x] Add Reown AppKit external-wallet connections and Circle passkey wallets to the existing Arc payment flow.
 - [x] Verify wallet dialog and seven automated wallet/payment checks; no browser runtime errors.
 - [x] Configure the supplied public Circle test client key.

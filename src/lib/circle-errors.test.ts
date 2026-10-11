@@ -1,0 +1,19 @@
+import { describe, expect, it } from 'vitest';
+import { isCircleCredentialError } from './circle-errors';
+
+describe('Circle credential rejection classification', () => {
+  it('recognizes the reported RPC credential rejection', () => {
+    expect(isCircleCredentialError(new Error('An unknown RPC error occurred. Details: Returned error: Invalid credentials. Version: viem@2.57.4'))).toBe(true);
+  });
+  it('recognizes nested HTTP 401 responses', () => {
+    expect(isCircleCredentialError({ cause: { status: 401 } })).toBe(true);
+  });
+  it('does not treat passkey cancellation as a credential failure', () => {
+    expect(isCircleCredentialError(new DOMException('Cancelled', 'NotAllowedError'))).toBe(false);
+  });
+  it('handles circular causes without looping', () => {
+    const error: { cause?: unknown } = {};
+    error.cause = error;
+    expect(isCircleCredentialError(error)).toBe(false);
+  });
+});
