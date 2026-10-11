@@ -1,9 +1,10 @@
 # FreelancePay
+- [x] Diagnose repeated Circle failure after console setup; latest requests show duplicate/invalid usernames, now classified with registration validation; 16 tests and browser checks pass.
 - [x] Stabilize wallet context identity during hot updates; pages and wallet dialog verified without runtime errors, regression tests pass.
 - [x] Restore the missing Circle test client key environment prefix and add regression tests.
 - [x] Replace opaque Circle connection errors with an actionable message identifying the current domain.
 - [x] Confirm Circle moved past HTTP 401 credential rejection in the latest preview request.
-- [ ] Complete Circle passkey configuration — registration now returns -32012, missing entity config; requires setup in the same Circle account/test environment and matching domain.
+- [x] Confirm Circle passkey configuration now passes — latest preview registration returns username errors -32024 and -32025, no longer -32012.
 - [x] Identify missing Circle entity configuration and show specific passkey setup guidance instead of the generic failure.
 - [x] Add Reown AppKit external-wallet connections and Circle passkey wallets to the existing Arc payment flow.
 - [x] Verify wallet dialog and seven automated wallet/payment checks; no browser runtime errors.

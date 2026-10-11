@@ -22,7 +22,31 @@ export function isCircleConfigurationError(error: unknown): boolean {
   ));
 }
 
+export function isCircleDuplicateUsernameError(error: unknown): boolean {
+  return matchesCircleError(error, details => details.code === -32024 || [details.message, details.details].some(value =>
+    typeof value === 'string' && /username is duplicated/i.test(value)
+  ));
+}
+
+export function isCircleInvalidUsernameError(error: unknown): boolean {
+  return matchesCircleError(error, details => details.code === -32025 || [details.message, details.details].some(value =>
+    typeof value === 'string' && /username is invalid/i.test(value)
+  ));
+}
+
+export function circleUsernameError(username: string): string | null {
+  return /^[a-zA-Z0-9_@.:+\-]{5,50}$/.test(username.trim())
+    ? null
+    : 'The username is invalid. Use 5–50 characters: letters, numbers, or _ @ . : + -. Spaces are not allowed.';
+}
+
 export function circleConnectionError(error: unknown, hostname: string): string {
+  if (isCircleDuplicateUsernameError(error)) {
+    return 'This username is already taken. If you previously created a wallet, choose “Sign in with passkey” on the device where you saved it. Otherwise, choose a different username.';
+  }
+  if (isCircleInvalidUsernameError(error)) {
+    return circleUsernameError('') ?? 'Choose a valid username.';
+  }
   if (isCircleConfigurationError(error)) {
     return `Circle passkey setup is missing for this app. In the same Circle Console account and test environment as your Client Key, open Wallets → Modular Wallets → Passkey and save a configuration for ${hostname}. The Client Key’s Web domain must match. Then retry creating your wallet. If already configured, ask Circle support to check error -32012.`;
   }
