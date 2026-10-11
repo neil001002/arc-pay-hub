@@ -6,8 +6,8 @@ import { arc, usdc, eurc, erc20Abi, vaultAddress, vaultAbi } from '@/lib/arc';
 import { paymentAmount, shortAddress } from '@/lib/payment-utils';
 import { Button } from '@/components/ui/button';
 import { Wallet, X, ArrowUpRight, LoaderCircle, Check } from 'lucide-react';
-export type Activity = { id:string; type:'payment'|'conversion'; name:string; address:string; amount:string; output?:string; date:string; hash?:string; };
-export const demoAddress:Address = '0x7a3D1B2c8F6E4a0d9C5B3f2E1A6D8c4B0E9F2a81';
+export type Activity = { id:string; type:'payment'|'conversion'; name:string; address:string; amount:string; output?:string|undefined; date:string; hash?:string|undefined; };
+export const demoAddress:Address = '0x7a3d1b2c8f6e4a0d9c5b3f2e1a6d8c4b0e9f2a81';
 const initialActivity:Activity[] = [
  {id:'d1',type:'payment',name:'Website redesign',address:'0x48a29C…71e3',amount:'1,250.00',date:'Oct 10, 2026 · 10:42 AM'},
  {id:'d2',type:'conversion',name:'USDC → EURC',address:'Stablecoin conversion',amount:'500.00',output:'428.65',date:'Oct 9, 2026 · 3:18 PM'},
