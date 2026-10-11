@@ -1,6 +1,7 @@
 # FreelancePay
-- [ ] Add Reown AppKit external-wallet connections and Circle passkey wallets to the existing Arc payment flow.
-- [ ] Verify wallet UI and automated checks; live provider verification requires valid public provider credentials.
+- [x] Add Reown AppKit external-wallet connections and Circle passkey wallets to the existing Arc payment flow.
+- [x] Verify wallet dialog and seven automated wallet/payment checks; no browser runtime errors.
+- [ ] Activate and live-verify Circle and AppKit — requires public Circle client key, Reown project ID, authorized domains, and funded wallets.
 - [x] Strengthen Arc contracts with caller-set conversion limits, executable local contract tests, and deployment checks.
 - [x] Build overview, dashboard, payment links, wallet connection, balances, and activity.
 - [x] Add Arc configuration, real-transfer code, and guarded FX conversion.

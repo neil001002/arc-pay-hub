@@ -13,6 +13,7 @@ export async function connectCircleWallet(register: boolean, username: string) {
     mode: register ? WebAuthnMode.Register : WebAuthnMode.Login,
     ...(register ? { username: username.trim() } : {}),
   });
+  // Circle's Arc bundler uses the chain-specific modular transport.
   const transport = toModularTransport(`${circleClientUrl}/arcTestnet`, circleClientKey);
   const client = createPublicClient({ chain: arcTestnet, transport });
   const account = await toCircleSmartAccount({ client, owner: toWebAuthnAccount({ credential }) });
