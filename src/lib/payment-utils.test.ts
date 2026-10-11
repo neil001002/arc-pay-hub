@@ -1,5 +1,5 @@
 import { describe,it,expect } from 'vitest';
-import { parseSearch } from '@tanstack/react-router';
+import { defaultParseSearch as parseSearch } from '@tanstack/react-router';
 import { paymentAmount,makePaymentLink,validRecipient,paymentLinkSearch } from './payment-utils';
 const address='0x3600000000000000000000000000000000000000';
 describe('USDC payment rules',()=>{

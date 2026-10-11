@@ -1,5 +1,5 @@
 import { isAddress, parseUnits } from 'viem';
-import { stringifySearch } from '@tanstack/react-router';
+import { defaultStringifySearch } from '@tanstack/react-router';
 export function paymentLinkSearch(search: Record<string, unknown>) {
  const rawAmount = search['amount'];
  return {
@@ -18,5 +18,5 @@ export function shortAddress(address: string) { return `${address.slice(0,6)}…
 export function makePaymentLink(origin: string, address: string, amount: string) {
  if (!validRecipient(address)) throw new Error('A valid recipient wallet is required.');
  paymentAmount(amount);
- return `${origin}/pay${stringifySearch({to:address,amount})}`;
+ return `${origin}/pay${defaultStringifySearch({to:address,amount})}`;
 }
