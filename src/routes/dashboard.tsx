@@ -1,0 +1,4 @@
+import { createFileRoute } from '@tanstack/react-router';
+import { Workspace } from '@/components/payments/workspace';
+export const Route=createFileRoute('/dashboard')({validateSearch:(search:Record<string,unknown>)=>({tab:search.tab==='conversions'?'conversions':undefined}),head:()=>({meta:[{title:'Payment workspace — FreelancePay on Arc'},{name:'description',content:'Create USDC payment links, track incoming payments and convert stablecoins on Arc Testnet.'},{property:'og:title',content:'Payment workspace — FreelancePay on Arc'},{property:'og:description',content:'Your payment links, balances and onchain activity in one workspace.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}),component:Dashboard});
+function Dashboard(){const {tab}=Route.useSearch();return <Workspace dashboard tab={tab} key={tab}/>;}
