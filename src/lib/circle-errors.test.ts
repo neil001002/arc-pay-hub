@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { isCircleCredentialError } from './circle-errors';
+import { isCircleCredentialError, isCircleConfigurationError } from './circle-errors';
+
+describe('Circle missing entity configuration', () => {
+  it('recognizes Circle RPC code -32012 inside a nested cause', () => {
+    expect(isCircleConfigurationError({ cause: { code: -32012 } })).toBe(true);
+  });
+  it('recognizes the reported missing entity response in viem details', () => {
+    expect(isCircleConfigurationError({ details: 'Returned error: Cannot find the entity config in the system.' })).toBe(true);
+  });
+  it('keeps credential rejection separate from configuration failures', () => {
+    expect(isCircleConfigurationError({ cause: { status: 401, message: 'Invalid credentials.' } })).toBe(false);
+  });
+});
 
 describe('Circle credential rejection classification', () => {
   it('recognizes the reported RPC credential rejection', () => {
