@@ -23,3 +23,5 @@
 - Use a deployed vault with a configured Uniswap-V2-compatible router for conversions; StableFX is a permissioned RFQ service, not a generic swap router.
 - Keep conversion minimum output and expiry in caller-signed calldata; immutable token/router configuration and exact balance checks prevent silent underdelivery.
 - Compile and exercise Solidity through local-only solc and Ganache tooling; never import deployment or test tooling into the app runtime.
+
+- Serialize generated payment links with TanStack search serialization and normalize legacy numeric search amounts; this preserves exact new amounts and keeps old shared links valid.
