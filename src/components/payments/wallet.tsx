@@ -8,7 +8,7 @@ import { paymentAmount, shortAddress } from '@/lib/payment-utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { circleClientKey, reownProjectId } from '@/lib/wallet-options';
-import { circleConnectionError } from '@/lib/circle-errors';
+import { circleConnectionError, circleUsernameError } from '@/lib/circle-errors';
 import { openAppKit } from '@/lib/wagmi';
 import type { CircleWallet } from '@/lib/circle-wallet';
 import { Wallet, X, ArrowUpRight, LoaderCircle, Check } from 'lucide-react';
@@ -64,6 +64,8 @@ function useWalletState() {
  }
  async function connectCircle(register: boolean, username: string) {
   if (circleConnecting) return;
+  const usernameError = register ? circleUsernameError(username) : null;
+  if (usernameError) { setCircleError(usernameError); return; }
   setCircleError(null);
   setCircleConnecting(true);
   try {
@@ -123,7 +125,7 @@ function WalletDialog(){
  <div className="flex justify-between items-center mb-6"><div className="brand-mark"><Wallet size={18}/></div><Button variant="ghost" size="icon" aria-label="Close wallet dialog" onClick={()=>w.setModal(false)}><X/></Button></div>
  <h2 className="text-2xl font-semibold">{w.isConnected?'Your wallet':'Connect your wallet'}</h2>
  {w.isConnected?<><p className="text-sm break-all mt-4 mb-3">{w.address}</p><p className="text-sm text-muted-foreground mb-4">{w.walletKind}</p><div className="flex items-center gap-2 text-success mb-6"><Check size={16}/> Connected to {w.chainId===arc.id?'Arc Testnet':'another network'}</div><Button variant="outline" className="w-full" onClick={()=>{w.disconnect();w.setModal(false);}}>Disconnect wallet</Button></>:<div className="space-y-5 mt-6">
- <div className="space-y-3"><h3 className="text-sm font-semibold">Circle wallet</h3><label className="text-xs text-muted-foreground" htmlFor="passkey-name">Passkey name</label><Input id="passkey-name" value={username} onChange={e=>setUsername(e.target.value)} placeholder="Your name" maxLength={64} disabled={!circleClientKey||w.connecting}/><Button className="w-full h-11" disabled={!circleClientKey||w.connecting||!username.trim()} onClick={()=>void w.connectCircle(true,username)}>{w.connecting?<LoaderCircle className="animate-spin"/>:<Wallet/>}Create Circle wallet</Button><Button variant="outline" className="w-full" disabled={!circleClientKey||w.connecting} onClick={()=>void w.connectCircle(false,'')}>Sign in with passkey</Button>{!circleClientKey&&<p className="text-xs text-muted-foreground" role="status">Circle setup pending</p>}</div>
+ <div className="space-y-3"><h3 className="text-sm font-semibold">Circle wallet</h3><label className="text-xs text-muted-foreground" htmlFor="passkey-name">Wallet username</label><Input id="passkey-name" value={username} onChange={e=>setUsername(e.target.value)} placeholder="sunil_kumar" maxLength={50} autoCapitalize="none" autoCorrect="off" spellCheck={false} disabled={!circleClientKey||w.connecting}/><Button className="w-full h-11" disabled={!circleClientKey||w.connecting||!username.trim()} onClick={()=>void w.connectCircle(true,username)}>{w.connecting?<LoaderCircle className="animate-spin"/>:<Wallet/>}Create Circle wallet</Button><Button variant="outline" className="w-full" disabled={!circleClientKey||w.connecting} onClick={()=>void w.connectCircle(false,'')}>Sign in with passkey</Button>{!circleClientKey&&<p className="text-xs text-muted-foreground" role="status">Circle setup pending</p>}</div>
  {w.circleError && <p role="alert" className="text-sm text-destructive break-words">{w.circleError}</p>}
  <div className="border-t border-border pt-5 space-y-3"><h3 className="text-sm font-semibold">External wallet</h3><Button variant="outline" className="w-full h-11" disabled={w.connecting} onClick={()=>void w.connectWallet()}><Wallet/>{reownProjectId?'Connect with AppKit':'Browser wallet'}<ArrowUpRight/></Button>{!reownProjectId&&<p className="text-xs text-muted-foreground" role="status">AppKit setup pending · Browser wallets available</p>}</div>
  </div>}<p className="mt-6 text-xs text-muted-foreground text-center">Testnet only. Never send real funds.</p></div></div>;

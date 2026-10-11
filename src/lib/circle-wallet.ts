@@ -3,11 +3,13 @@ import { createPublicClient, type Address, type Hex } from 'viem';
 import { createBundlerClient, toWebAuthnAccount } from 'viem/account-abstraction';
 import { arcTestnet } from 'viem/chains';
 import { circleClientKey, circleClientUrl, assertPasskeySupport } from './wallet-options';
+import { circleUsernameError } from './circle-errors';
 
 export const connectCircleWallet = createClientOnlyFn(async (register: boolean, username: string) => {
   if (!circleClientKey) throw new Error('Circle wallets are awaiting the Circle client key.');
   assertPasskeySupport(window.isSecureContext, typeof window.PublicKeyCredential !== 'undefined');
-  if (register && !username.trim()) throw new Error('Enter a name for your passkey.');
+  const usernameError = register ? circleUsernameError(username) : null;
+  if (usernameError) throw new Error(usernameError);
    // A dynamic import alone still enters the hosted server graph. The client-only
    // boundary removes this SDK import from server compilation entirely.
    const { toWebAuthnCredential, toPasskeyTransport, toModularTransport, toCircleSmartAccount, WebAuthnMode } = await import('@circle-fin/modular-wallets-core');
