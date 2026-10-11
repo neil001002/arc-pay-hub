@@ -2,7 +2,9 @@
 - [x] Stabilize wallet context identity during hot updates; pages and wallet dialog verified without runtime errors, regression tests pass.
 - [x] Restore the missing Circle test client key environment prefix and add regression tests.
 - [x] Replace opaque Circle connection errors with an actionable message identifying the current domain.
-- [ ] Clear Circle’s remaining HTTP 401 rejection — corrected full key still rejected; requires checking its active status and matching Web/Passkey domains in Circle Console or supplying a replacement public Client Key.
+- [x] Confirm Circle moved past HTTP 401 credential rejection in the latest preview request.
+- [ ] Complete Circle passkey configuration — registration now returns -32012, missing entity config; requires setup in the same Circle account/test environment and matching domain.
+- [x] Identify missing Circle entity configuration and show specific passkey setup guidance instead of the generic failure.
 - [x] Add Reown AppKit external-wallet connections and Circle passkey wallets to the existing Arc payment flow.
 - [x] Verify wallet dialog and seven automated wallet/payment checks; no browser runtime errors.
 - [x] Configure the supplied public Circle test client key.
