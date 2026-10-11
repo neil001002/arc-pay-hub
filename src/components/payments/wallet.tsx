@@ -7,6 +7,7 @@ import { paymentAmount, shortAddress } from '@/lib/payment-utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { circleClientKey, reownProjectId } from '@/lib/wallet-options';
+import { circleConnectionError } from '@/lib/circle-errors';
 import { openAppKit } from '@/lib/wagmi';
 import type { CircleWallet } from '@/lib/circle-wallet';
 import { Wallet, X, ArrowUpRight, LoaderCircle, Check } from 'lucide-react';
@@ -22,6 +23,7 @@ function useWalletState() {
  const external = useAccount();
  const [circle, setCircle] = useState<CircleWallet | null>(null);
  const [circleConnecting, setCircleConnecting] = useState(false);
+ const [circleError, setCircleError] = useState<string | null>(null);
  const address = circle?.address ?? external.address;
  const isConnected = !!circle || external.isConnected;
  const chainId = circle ? arc.id : external.chainId;
@@ -60,12 +62,14 @@ function useWalletState() {
   try{ await connectAsync({connector}); setModal(false); toast.success('Wallet connected'); }catch{toast.error('Connection was cancelled. Please try again.');}
  }
  async function connectCircle(register: boolean, username: string) {
+  if (circleConnecting) return;
+  setCircleError(null);
   setCircleConnecting(true);
   try {
    const { connectCircleWallet } = await import('@/lib/circle-wallet');
    const wallet = await connectCircleWallet(register, username);
    disconnectExternal(); setCircle(wallet); setModal(false); toast.success('Circle wallet connected');
-  } catch (error) { toast.error(error instanceof Error ? error.message : 'Passkey connection was cancelled.'); }
+  } catch (error) { setCircleError(circleConnectionError(error, window.location.hostname)); }
   finally { setCircleConnecting(false); }
  }
  async function ensureArc() { if(!circle && chainId!==arc.id) await switchChainAsync({chainId:arc.id}); }
@@ -105,7 +109,7 @@ function useWalletState() {
    const events=parseEventLogs({abi:vaultAbi,logs:receipt.logs,eventName:'FXConversion'}); const output=events[0]?.args.amountOut;toast.success(`Conversion confirmed${output?`: ${formatUnits(output,6)} EURC`:''}`);void balance.refetch();void euroBalance.refetch();void refreshActivity();return {hash,output:output?formatUnits(output,6):undefined};
   } finally {setBusy(false);}
  }
- return {address,isConnected,chainId,modal,setModal,connectWallet,connectCircle,walletKind:circle?'Circle passkey':'External wallet',connecting,disconnect,busy,pay,convert,demo,setDemo,activity,setActivity,refreshActivity,loadingActivity,balance:demo?'2,450.00':balance.data!==undefined?Number(formatUnits(balance.data,6)).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:6}):'—',euroBalance:demo?'428.65':euroBalance.data!==undefined?Number(formatUnits(euroBalance.data,6)).toFixed(2):'—',balanceError:balance.isError};
+ return {address,isConnected,chainId,modal,setModal,connectWallet,connectCircle,circleError,walletKind:circle?'Circle passkey':'External wallet',connecting,disconnect,busy,pay,convert,demo,setDemo,activity,setActivity,refreshActivity,loadingActivity,balance:demo?'2,450.00':balance.data!==undefined?Number(formatUnits(balance.data,6)).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:6}):'—',euroBalance:demo?'428.65':euroBalance.data!==undefined?Number(formatUnits(euroBalance.data,6)).toFixed(2):'—',balanceError:balance.isError};
 }
 const WalletContext = createContext<ReturnType<typeof useWalletState>|null>(null);
 export function WalletProvider({children}:{children:ReactNode}) { const state=useWalletState();return <WalletContext.Provider value={state}>{children}<WalletDialog/></WalletContext.Provider>; }
@@ -119,6 +123,7 @@ function WalletDialog(){
  <h2 className="text-2xl font-semibold">{w.isConnected?'Your wallet':'Connect your wallet'}</h2>
  {w.isConnected?<><p className="text-sm break-all mt-4 mb-3">{w.address}</p><p className="text-sm text-muted-foreground mb-4">{w.walletKind}</p><div className="flex items-center gap-2 text-success mb-6"><Check size={16}/> Connected to {w.chainId===arc.id?'Arc Testnet':'another network'}</div><Button variant="outline" className="w-full" onClick={()=>{w.disconnect();w.setModal(false);}}>Disconnect wallet</Button></>:<div className="space-y-5 mt-6">
  <div className="space-y-3"><h3 className="text-sm font-semibold">Circle wallet</h3><label className="text-xs text-muted-foreground" htmlFor="passkey-name">Passkey name</label><Input id="passkey-name" value={username} onChange={e=>setUsername(e.target.value)} placeholder="Your name" maxLength={64} disabled={!circleClientKey||w.connecting}/><Button className="w-full h-11" disabled={!circleClientKey||w.connecting||!username.trim()} onClick={()=>void w.connectCircle(true,username)}>{w.connecting?<LoaderCircle className="animate-spin"/>:<Wallet/>}Create Circle wallet</Button><Button variant="outline" className="w-full" disabled={!circleClientKey||w.connecting} onClick={()=>void w.connectCircle(false,'')}>Sign in with passkey</Button>{!circleClientKey&&<p className="text-xs text-muted-foreground" role="status">Circle setup pending</p>}</div>
+ {w.circleError && <p role="alert" className="text-sm text-destructive break-words">{w.circleError}</p>}
  <div className="border-t border-border pt-5 space-y-3"><h3 className="text-sm font-semibold">External wallet</h3><Button variant="outline" className="w-full h-11" disabled={w.connecting} onClick={()=>void w.connectWallet()}><Wallet/>{reownProjectId?'Connect with AppKit':'Browser wallet'}<ArrowUpRight/></Button>{!reownProjectId&&<p className="text-xs text-muted-foreground" role="status">AppKit setup pending · Browser wallets available</p>}</div>
  </div>}<p className="mt-6 text-xs text-muted-foreground text-center">Testnet only. Never send real funds.</p></div></div>;
 }
