@@ -9,7 +9,7 @@ import {
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { WagmiProvider } from 'wagmi';
+import { WagmiProvider, type Config } from 'wagmi';
 import { Toaster } from 'sonner';
 import { walletConfig, initializeAppKit } from '@/lib/wagmi';
 import { reownProjectId } from '@/lib/wallet-options';
@@ -118,7 +118,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const [config, setConfig] = useState(walletConfig);
+  const [config, setConfig] = useState<Config>(walletConfig);
   useEffect(() => {
     if (!reownProjectId) return;
     void initializeAppKit().then(kit => { if (kit) setConfig(kit.config); }).catch(error => reportLovableError(error, { boundary: 'wallet_initialization' }));
