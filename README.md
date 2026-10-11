@@ -2,7 +2,17 @@
 A hackathon MVP for direct cross-border freelancer payments in USDC, with a minimal payment-link workspace and optional USDC → EURC conversion on Arc Testnet.
 
 ## Framework
-This Lovable application uses **TanStack Start, React 19, TypeScript and Tailwind v4**, not Next.js. Pages are `/`, `/dashboard`, and `/pay`. Wallet interaction uses wagmi + viem and an injected EIP-1193 wallet (MetaMask or compatible). No WalletConnect project key is needed. Wallet private keys never enter the app.
+This Lovable application uses **TanStack Start, React 19, TypeScript and Tailwind v4**, not Next.js. Pages are `/`, `/dashboard`, and `/pay`. External wallets use Reown AppKit's wagmi adapter (including WalletConnect); embedded wallets use Circle modular wallets with device passkeys. Wallet private keys never enter the app.
+
+## Wallet provider setup
+1. Create a project at https://cloud.reown.com and set its public project ID as `VITE_REOWN_PROJECT_ID`. Allowlist the preview and published origins. Until configured, browser-wallet connection remains available but AppKit is not active.
+2. In Circle Console → Keys → Create a key → Client Key, create a **public client key**, set `VITE_CIRCLE_CLIENT_KEY`, and configure Wallets → Modular Wallets → Passkey with the matching domain. This integration uses Circle modular passkey wallets, not the PIN-based user-controlled Wallets API. No private Circle API key or app backend is required.
+3. Both identifiers are public browser configuration, not wallet secrets. Rebuild/publish after setting them. Never substitute a Circle private API key for the client key.
+4. Create a Circle wallet with a passkey name or sign in with an existing passkey. Credentials remain on the user's device; the app keeps only the connected account in memory, and users sign in again after reload. Disconnect clears the in-memory account, not the user's passkey.
+5. Circle supports Arc Testnet (`arcTestnet`) and sponsors testnet user operations. Fund the smart account's address with test USDC. Transfers, vault approvals, and conversions use contract calldata, verify user-operation success, and then verify the transaction receipt. Existing slippage/deadline rules apply unchanged. External wallets fund their own gas.
+6. Passkeys require HTTPS (localhost is allowed), browser/device support, and an authorized domain. Preview and published domains can have different passkey identities; use a stable domain for persistent user wallets. Set up Circle passkey recovery before production; this testnet MVP does not implement recovery UI.
+
+Provider calls have not been live-verified without the public identifiers and funded wallets. Circle documentation: https://developers.circle.com/wallets/modular/create-a-modular-wallet and https://developers.circle.com/wallets/modular/transfer-tokens.
 
 ## Run locally
 ```sh

@@ -11,7 +11,9 @@
 
 ## Architecture
 - Keep TanStack Start file routes and TypeScript instead of Next.js; the hosted runtime supports this framework.
-- Use wagmi with an injected browser wallet and viem for Arc ERC-20 balances, transactions, and event reads; payments are persisted onchain without an app database.
+- Use Reown AppKit's wagmi adapter for external wallets, with injected fallback when unconfigured; use Circle modular passkey wallets for embedded accounts, so users retain custody and payments remain onchain without an app database.
+- Initialize AppKit and import Circle's SDK only after hydration or user action; browser wallet SDKs must not execute in SSR.
+- Route Circle contract calls through sponsored user operations and verify both user-operation success and transaction receipts; external wallets keep wagmi signing and both share viem reads.
 - Keep demo activity explicitly labeled and separate from connected-wallet onchain reads; sample data must never be presented as real funds or confirmations.
 - Place Arc public configuration and ABIs in shared browser-safe modules; private deployer keys belong only to local deployment scripts.
 - Use a deployed vault with a configured Uniswap-V2-compatible router for conversions; StableFX is a permissioned RFQ service, not a generic swap router.

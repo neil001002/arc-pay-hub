@@ -8,10 +8,11 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { WagmiProvider } from 'wagmi';
 import { Toaster } from 'sonner';
-import { walletConfig } from '@/lib/wagmi';
+import { walletConfig, initializeAppKit } from '@/lib/wagmi';
+import { reownProjectId } from '@/lib/wallet-options';
 import { WalletProvider } from '@/components/payments/wallet';
 import { AppShell } from '@/components/payments/shell';
 
@@ -117,9 +118,14 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const [config, setConfig] = useState(walletConfig);
+  useEffect(() => {
+    if (!reownProjectId) return;
+    void initializeAppKit().then(kit => { if (kit) setConfig(kit.config); }).catch(error => reportLovableError(error, { boundary: 'wallet_initialization' }));
+  }, []);
 
   return (
-    <WagmiProvider config={walletConfig}><QueryClientProvider client={queryClient}><WalletProvider><AppShell>
+    <WagmiProvider config={config}><QueryClientProvider client={queryClient}><WalletProvider><AppShell>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </AppShell><Toaster position="bottom-right" richColors /></WalletProvider></QueryClientProvider></WagmiProvider>
