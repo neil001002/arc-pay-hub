@@ -54,7 +54,7 @@ export function circleConnectionError(error: unknown, hostname: string): string 
     return `Circle rejected this app’s client key. In Circle Console, check that the Client Key is active and its Web domain is ${hostname}, then configure the same domain under Wallets → Modular Wallets → Passkey. If the key was revoked or belongs to another app, replace it with a matching Client Key.`;
   }
   if (error instanceof Error && error.name === 'NotAllowedError') {
-    return 'Passkey creation or sign-in was cancelled. Please try again.';
+    return `Passkey creation was denied or timed out. If you are in a preview, ensure the browser supports passkeys in iframes and you triggered this with a direct click on ${hostname}.`;
   }
   return 'Circle wallet connection failed. Check your connection and Circle passkey setup, then try again.';
 }

@@ -5,14 +5,20 @@ import { arcTestnet } from 'viem/chains';
 import { circleClientKey, circleClientUrl, assertPasskeySupport } from './wallet-options';
 import { circleUsernameError } from './circle-errors';
 
+// Dynamic imports are moved to the top level but still inside the client-only boundary context
+// to ensure they are available immediately when the function is called, preserving the user gesture.
+const getSDK = async () => {
+  return import('@circle-fin/modular-wallets-core');
+};
+
 export const connectCircleWallet = createClientOnlyFn(async (register: boolean, username: string) => {
   if (!circleClientKey) throw new Error('Circle wallets are awaiting the Circle client key.');
   assertPasskeySupport(window.isSecureContext, typeof window.PublicKeyCredential !== 'undefined');
   const usernameError = register ? circleUsernameError(username) : null;
   if (usernameError) throw new Error(usernameError);
-   // A dynamic import alone still enters the hosted server graph. The client-only
-   // boundary removes this SDK import from server compilation entirely.
-   const { toWebAuthnCredential, toPasskeyTransport, toModularTransport, toCircleSmartAccount, WebAuthnMode } = await import('@circle-fin/modular-wallets-core');
+  
+  const { toWebAuthnCredential, toPasskeyTransport, toModularTransport, toCircleSmartAccount, WebAuthnMode } = await getSDK();
+  
   const credential = await toWebAuthnCredential({
     transport: toPasskeyTransport(circleClientUrl, circleClientKey),
     mode: register ? WebAuthnMode.Register : WebAuthnMode.Login,
