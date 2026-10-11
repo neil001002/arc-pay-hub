@@ -1,5 +1,5 @@
 # FreelancePay
-- [ ] Resolve Circle credential rejection — confirm matching Client Key web domain and Modular Wallets passkey domain in Circle Console; dashboard access is required.
+- [x] Restore the missing Circle test client key environment prefix and add regression tests.
 - [x] Replace opaque Circle connection errors with an actionable message identifying the current domain.
 - [x] Add Reown AppKit external-wallet connections and Circle passkey wallets to the existing Arc payment flow.
 - [x] Verify wallet dialog and seven automated wallet/payment checks; no browser runtime errors.
