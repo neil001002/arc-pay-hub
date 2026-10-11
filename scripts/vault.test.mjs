@@ -99,6 +99,21 @@ test('blocks router reentry during conversion', async () => {
   await fixture(); await write(router, 'configure', [900_000n, false, vault.address]);
   await conversion(); assert.equal(await read(router, 'reentryBlocked'), true);
 });
+test('rejects fee-on-transfer input instead of spending prior vault funds', async () => {
+  await fixture(); await write(tokens[0], 'setFee', [true]);
+  await assert.rejects(() => conversion(), error => error.message.includes('Unsupported input transfer'));
+  assert.equal(await read(tokens[0], 'balanceOf', [payer]), 10_000_000n);
+});
+test('rejects fee-on-transfer payment underdelivery', async () => {
+  await fixture(); await write(tokens[0], 'setFee', [true]);
+  await rejectsCall(vault, 'forwardUSDC', [recipient, 1_000_000n], 'Unsupported payment transfer');
+  assert.equal(await read(tokens[0], 'balanceOf', [recipient]), 0n);
+});
+test('checks actual recipient output even when router funds cover transfer fees', async () => {
+  await fixture(); await write(tokens[1], 'setFee', [true]);
+  await assert.rejects(() => conversion(880_000n), error => error.message.includes('Unsupported output transfer'));
+  assert.equal(await read(tokens[1], 'balanceOf', [payer]), 0n);
+});
 test('constructor rejects zero addresses, identical tokens and noncontracts', async () => {
   await fixture();
   for (const [args] of [
