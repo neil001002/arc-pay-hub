@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { useContext, useState, useEffect, type ReactNode } from 'react';
+import { WalletContext } from './wallet-context';
 import { useAccount, useConnect, useDisconnect, useReadContract, usePublicClient, useSwitchChain, useWriteContract } from 'wagmi';
 import { encodeFunctionData, formatUnits, parseEventLogs, type Address } from 'viem';
 import { toast } from 'sonner';
@@ -111,7 +112,7 @@ function useWalletState() {
  }
  return {address,isConnected,chainId,modal,setModal,connectWallet,connectCircle,circleError,walletKind:circle?'Circle passkey':'External wallet',connecting,disconnect,busy,pay,convert,demo,setDemo,activity,setActivity,refreshActivity,loadingActivity,balance:demo?'2,450.00':balance.data!==undefined?Number(formatUnits(balance.data,6)).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:6}):'—',euroBalance:demo?'428.65':euroBalance.data!==undefined?Number(formatUnits(euroBalance.data,6)).toFixed(2):'—',balanceError:balance.isError};
 }
-const WalletContext = createContext<ReturnType<typeof useWalletState>|null>(null);
+export type WalletState = ReturnType<typeof useWalletState>;
 export function WalletProvider({children}:{children:ReactNode}) { const state=useWalletState();return <WalletContext.Provider value={state}>{children}<WalletDialog/></WalletContext.Provider>; }
 export function useWallet(){const context=useContext(WalletContext);if(!context)throw new Error('Wallet provider is missing');return context;}
 export function WalletButton(){const w=useWallet();return <Button variant="outline" onClick={()=>w.setModal(true)} className="h-10"><Wallet/>{w.address?shortAddress(w.address):'Connect wallet'}</Button>;}
