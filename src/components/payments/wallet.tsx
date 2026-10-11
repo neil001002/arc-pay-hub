@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import { useAccount, useConnect, useDisconnect, useReadContract, usePublicClient, useSwitchChain, useWriteContract } from 'wagmi';
 import { formatUnits, parseEventLogs, type Address } from 'viem';
 import { toast } from 'sonner';
-import { arc, usdc, eurc, erc20Abi, vaultAddress, vaultAbi } from '@/lib/arc';
+import { arc, usdc, eurc, erc20Abi, vaultAddress, vaultAbi, routerAbi } from '@/lib/arc';
 import { paymentAmount, shortAddress } from '@/lib/payment-utils';
 import { Button } from '@/components/ui/button';
 import { Wallet, X, ArrowUpRight, LoaderCircle, Check } from 'lucide-react';
@@ -59,9 +59,21 @@ function useWalletState() {
   setBusy(true);
   try {
    await ensureArc();
+   const [configuredInput,configuredTarget,configuredRouter]=await Promise.all([
+    client.readContract({address:vaultAddress,abi:vaultAbi,functionName:'USDC'}),
+    client.readContract({address:vaultAddress,abi:vaultAbi,functionName:'localStablecoin'}),
+    client.readContract({address:vaultAddress,abi:vaultAbi,functionName:'router'}),
+   ]);
+   if(configuredInput.toLowerCase()!==usdc.toLowerCase()||configuredTarget.toLowerCase()!==eurc.toLowerCase())throw new Error('Vault tokens do not match the app configuration.');
    const allowance=await client.readContract({address:usdc,abi:erc20Abi,functionName:'allowance',args:[address,vaultAddress]});
    if(allowance<units){toast.message('Approve USDC in your wallet');const approval=await writeContractAsync({address:usdc,abi:erc20Abi,functionName:'approve',args:[vaultAddress,units],chainId:arc.id});const r=await client.waitForTransactionReceipt({hash:approval});if(r.status!=='success')throw new Error('Approval failed.');}
-   const hash=await writeContractAsync({address:vaultAddress,abi:vaultAbi,functionName:'convertToLocalStablecoin',args:[units,eurc],chainId:arc.id});toast.message('Conversion submitted');const receipt=await client.waitForTransactionReceipt({hash});if(receipt.status!=='success')throw new Error('Conversion reverted.');
+   const quote=await client.readContract({address:configuredRouter,abi:routerAbi,functionName:'getAmountsOut',args:[units,[usdc,eurc]]});
+   const outputQuote=quote[1];
+   if(quote.length!==2||outputQuote===undefined||outputQuote<=0n)throw new Error('No conversion liquidity is available.');
+   const minimumOut=outputQuote*9900n/10000n;
+   if(minimumOut===0n)throw new Error('Conversion amount is too small.');
+   const block=await client.getBlock();
+   const hash=await writeContractAsync({address:vaultAddress,abi:vaultAbi,functionName:'convertToLocalStablecoin',args:[units,eurc,minimumOut,block.timestamp+300n],chainId:arc.id});toast.message('Conversion submitted');const receipt=await client.waitForTransactionReceipt({hash});if(receipt.status!=='success')throw new Error('Conversion reverted.');
    const events=parseEventLogs({abi:vaultAbi,logs:receipt.logs,eventName:'FXConversion'}); const output=events[0]?.args.amountOut;toast.success(`Conversion confirmed${output?`: ${formatUnits(output,6)} EURC`:''}`);void balance.refetch();void euroBalance.refetch();void refreshActivity();return {hash,output:output?formatUnits(output,6):undefined};
   } finally {setBusy(false);}
  }

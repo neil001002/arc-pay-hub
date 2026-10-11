@@ -38,7 +38,11 @@ node --env-file=.env.local scripts/deploy-vault.mjs
 4. Copy the returned address into `VITE_VAULT_ADDRESS`, restart the app, and ensure the configured target matches the vault's immutable target.
 5. The app requests exact USDC allowance if needed, waits for approval, calls `convertToLocalStablecoin`, then shows the output from its FXConversion event and the transaction hash.
 
-The immutable router vault requires positive input, an allowlisted immutable target, reentrancy protection, SafeERC20 transfers, a five-minute swap deadline, and a minimum output of 99% of the immediate router quote. Router-derived slippage is not an independent price oracle and does not fully prevent price manipulation. This code is unaudited, testnet-only, and not suitable for real money. StableFX onboarding or a verified liquid router and vault deployment remain external prerequisites for a real conversion demo.
+The immutable router vault requires positive input, an immutable target, reentrancy protection, SafeERC20 transfers, and exact input/output balance checks. The caller signs `convertToLocalStablecoin(amountUSDC, targetStablecoin, minimumOut, deadline)`: minimum output must be positive and the deadline must be within five minutes. The app quotes the vault's immutable router after approval and sets a 99% minimum in signed calldata; it also checks the vault tokens match the app. Router-derived quotes are not independent price oracles and do not prevent all price manipulation. Redeploy older two-argument vaults before using this updated app.
+
+`forwardUSDC(to, amount)` is optional for integrations needing `PaymentReceived` events. It requires an exact allowance and disallows zero, self, and vault recipients. The current payment page still uses direct ERC-20 `transfer`, so it needs no vault approval. Neither path charges a platform fee or creates escrow. The vault has no owner, upgrade mechanism, arbitrary token withdrawal, or rescue function; do not send tokens to it directly because unsolicited balances cannot be recovered.
+
+The deployment script checks RPC chain ID, deployed bytecode, and six-decimal tokens before deployment. It cannot prove router safety or liquidity. This code is unaudited, testnet-only, and not suitable for real money. A verified liquid Arc router, funded deployer, and independent audit remain external prerequisites for production use.
 
 ## Structure
 - `src/routes/`: Overview, dashboard, payment page, and shared root providers.
@@ -50,5 +54,7 @@ The immutable router vault requires positive input, an allowlisted immutable tar
 ## Checks
 ```sh
 bun run test
+node --test scripts/vault.test.mjs
 ```
+The Solidity suite compiles the real vault and runs transactions on an isolated local EVM with mock stablecoins/router. It is not an Arc deployment or an audit.
 No KYC, fiat off-ramp, custodial accounts, admin panel, or multi-chain support is included. Transactions are persisted onchain; no app database or browser-only payment history is required.
