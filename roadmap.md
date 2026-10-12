@@ -18,4 +18,5 @@
 - [x] Add vault contract, deployment script, setup documentation, and rule tests.
 - [x] Verify pages and demo interactions; five tests passed, vault compiled, browser reported no runtime errors or mobile overflow.
 - [ ] Verify a real two-wallet payment — requires connected, funded Arc Testnet wallets.
-- [ ] Enable and verify a real conversion — router verified live on Arc Testnet (0xe27d5d256b370604f1ff060fb489c6a8e3f8a6d9, USDC/EURC pool quoting ~0.97 EURC per USDC); vault deployment blocked on funding deployer 0xC1f1Ec6E70264B31E67db4a2b839021C4Ed8A10B with test USDC.
+- [x] Deploy the funded Arc Testnet conversion vault and configure its public address: 0xbe3de044c7c9a2c0a1c7b2d8bb0eb8551ee1ff7c; deployment transaction 0xc0007699e0d3a5a8a4674437b6d65e2a5571dee51d945bb2a7f01fb41385b494.
+- [ ] Verify a real conversion through the connected-wallet UI and confirm EURC balances and activity.

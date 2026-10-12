@@ -6,6 +6,7 @@ export const eurc = (import.meta.env['VITE_TARGET_STABLECOIN_ADDRESS'] || '0x89B
 // Community-deployed Uniswap V2 Router02 on Arc Testnet with a live USDC/EURC pool; override with VITE_DEX_ROUTER_ADDRESS.
 export const routerAddress = (import.meta.env['VITE_DEX_ROUTER_ADDRESS'] || '0xe27d5d256b370604f1ff060fb489c6a8e3f8a6d9') as Address;
 export const routerAbi = parseAbi(['function getAmountsOut(uint256 amountIn,address[] path) view returns (uint256[])','function swapExactTokensForTokens(uint256 amountIn,uint256 amountOutMin,address[] path,address to,uint256 deadline) returns (uint256[])']);
-export const vaultAddress = import.meta.env['VITE_VAULT_ADDRESS'] as Address | undefined;
+// Deployed FreelancePayVault on Arc Testnet; public address only, with an environment override.
+export const vaultAddress = (import.meta.env['VITE_VAULT_ADDRESS'] || '0xbe3de044c7c9a2c0a1c7b2d8bb0eb8551ee1ff7c') as Address;
 export { erc20Abi };
 export const vaultAbi = parseAbi(['function USDC() view returns (address)', 'function localStablecoin() view returns (address)', 'function router() view returns (address)', 'function forwardUSDC(address to,uint256 amount)', 'function convertToLocalStablecoin(uint256 amountUSDC,address targetStablecoin,uint256 minimumOut,uint256 deadline) returns (uint256)', 'event PaymentReceived(address indexed from,address indexed to,uint256 amount)', 'event FXConversion(address indexed user,uint256 amountIn,address tokenIn,uint256 amountOut,address tokenOut)']);

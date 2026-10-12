@@ -37,9 +37,11 @@ Verified reference docs:
 5. Refresh the recipient dashboard. Activity reads recent Transfer and vault FXConversion logs, bounded to the latest 10,000 blocks and 20 entries. Total received is the sum of this recent window, not an all-time accounting total. RPC providers may impose log limits; failures are surfaced without inventing activity. Balances refresh every 15 seconds.
 
 ## Conversion configuration and deployment
-**StableFX is a permissioned institutional RFQ API and settlement system, not a generic permissionless `swap` function.** This MVP does not claim a live StableFX integration. Its vault supports a **Uniswap-V2-compatible DEX router** via `getAmountsOut` and `swapExactTokensForTokens`. Conversion is intentionally blocked until you configure a deployed vault.
+**StableFX is a permissioned institutional RFQ API and settlement system, not a generic permissionless `swap` function.** This MVP does not claim a live StableFX integration. Its vault supports a **Uniswap-V2-compatible DEX router** via `getAmountsOut` and `swapExactTokensForTokens`.
 
-1. Verify a real router contract on your selected Arc network: ABI compatibility, bytecode, permissions, and direct USDC/EURC liquidity. No speculative router is hardcoded.
+The Arc Testnet default vault is `0xbe3de044c7c9a2c0a1c7b2d8bb0eb8551ee1ff7c`, deployed in transaction `0xc0007699e0d3a5a8a4674437b6d65e2a5571dee51d945bb2a7f01fb41385b494`. It uses USDC, EURC, and the community router `0xe27d5d256b370604f1ff060fb489c6a8e3f8a6d9`. This is an unaudited testnet integration, not an endorsement of the community router. Public environment values can override these defaults for a new deployment.
+
+1. Before replacing the default router, verify the new contract on your selected Arc network: ABI compatibility, bytecode, permissions, and direct USDC/EURC liquidity.
 2. Set `VITE_DEX_ROUTER_ADDRESS`, the two token addresses, and a funded local deployer's `DEPLOYER_PRIVATE_KEY` in `.env.local`. Never prefix a private key with `VITE_` or commit it.
 3. Deploy with Node 22+:
 ```sh
