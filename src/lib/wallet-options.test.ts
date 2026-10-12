@@ -16,4 +16,7 @@ describe('Circle passkey requirements', () => {
   it('rejects an insecure origin', () => expect(() => assertPasskeySupport(false, true)).toThrow());
   it('rejects browsers without passkeys', () => expect(() => assertPasskeySupport(true, false)).toThrow());
   it('accepts secure passkey-capable browsers', () => expect(() => assertPasskeySupport(true, true)).not.toThrow());
+});import { reownProjectId } from './wallet-options';
+describe('Reown AppKit configuration', () => {
+  it('configures the supplied project ID', () => expect(reownProjectId).toBe('8990917f3fe272b940924329ed04905a'));
 });

@@ -1,4 +1,5 @@
-export const reownProjectId = import.meta.env["VITE_REOWN_PROJECT_ID"] ?? "";
+// Reown Project IDs are public browser configuration; an environment value can override it.
+export const reownProjectId = import.meta.env["VITE_REOWN_PROJECT_ID"] || "8990917f3fe272b940924329ed04905a";
 export function normalizeCircleClientKey(value: string): string {
   const key = value.trim();
   // Circle requires the complete Client Key, including its environment prefix.
