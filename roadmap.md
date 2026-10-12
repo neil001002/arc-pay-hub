@@ -10,6 +10,7 @@
 - [x] Add Reown AppKit external-wallet connections and Circle passkey wallets to the existing Arc payment flow.
 - [x] Verify wallet dialog and seven automated wallet/payment checks; no browser runtime errors.
 - [x] Configure the supplied public Circle test client key.
+- [x] Configure Reown project ID
 - [ ] Live-verify Circle and activate AppKit — requires authorized Circle domains and device passkeys, Reown project ID, and funded wallets.
 - [x] Strengthen Arc contracts with caller-set conversion limits, executable local contract tests, and deployment checks.
 - [x] Build overview, dashboard, payment links, wallet connection, balances, and activity.
