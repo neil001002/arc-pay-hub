@@ -18,4 +18,4 @@
 - [x] Add vault contract, deployment script, setup documentation, and rule tests.
 - [x] Verify pages and demo interactions; five tests passed, vault compiled, browser reported no runtime errors or mobile overflow.
 - [ ] Verify a real two-wallet payment — requires connected, funded Arc Testnet wallets.
-- [ ] Enable and verify a real conversion — requires a verified liquid Arc DEX router and funded vault deployment.
+- [ ] Enable and verify a real conversion — router verified live on Arc Testnet (0xe27d5d256b370604f1ff060fb489c6a8e3f8a6d9, USDC/EURC pool quoting ~0.97 EURC per USDC); vault deployment blocked on funding deployer 0xC1f1Ec6E70264B31E67db4a2b839021C4Ed8A10B with test USDC.
