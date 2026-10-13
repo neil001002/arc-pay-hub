@@ -3,7 +3,7 @@ import { WalletContext } from './wallet-context';
 import { useAccount, useConnect, useDisconnect, useReadContract, usePublicClient, useSwitchChain, useWriteContract } from 'wagmi';
 import { encodeFunctionData, formatUnits, parseEventLogs, type Address } from 'viem';
 import { toast } from 'sonner';
-import { arc, usdc, eurc, erc20Abi, vaultAddress, vaultAbi, routerAbi } from '@/lib/arc';
+import { arcNetworks, parseNetworkKey, usdc, erc20Abi, vaultAbi, routerAbi, type NetworkKey } from '@/lib/arc';
 import { paymentAmount, shortAddress } from '@/lib/payment-utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,10 @@ function useWalletState() {
  const [circle, setCircle] = useState<CircleWallet | null>(null);
  const [circleConnecting, setCircleConnecting] = useState(false);
  const [circleError, setCircleError] = useState<string | null>(null);
+ const [networkKey,setNetworkKeyState] = useState<NetworkKey>('testnet');
+ const network = arcNetworks[networkKey]; const arc = network.chain; const eurc = network.eurc; const vaultAddress = network.vault;
+ useEffect(()=>{ setNetworkKeyState(parseNetworkKey(window.localStorage.getItem('freelancepay-network'))); },[]);
+ function setNetwork(key: NetworkKey) { window.localStorage.setItem('freelancepay-network', key); if (key !== networkKey && circle && !arcNetworks[key].circle) { setCircle(null); toast.info('Circle passkey wallets are available on Arc Testnet only.'); } setNetworkKeyState(key); if (external.isConnected && external.chainId !== arcNetworks[key].chain.id) void switchChainAsync({chainId:arcNetworks[key].chain.id}).catch(()=>toast.error('Switch networks in your wallet to continue.')); }
  const address = circle?.address ?? external.address;
  const isConnected = !!circle || external.isConnected;
  const chainId = circle ? arc.id : external.chainId;
@@ -36,7 +40,7 @@ function useWalletState() {
  const [modal,setModal] = useState(false); const [busy,setBusy] = useState(false); const [demo,setDemo] = useState(true);
  const [activity,setActivity] = useState<Activity[]>(initialActivity); const [loadingActivity,setLoadingActivity] = useState(false);
  const balance = useReadContract({address:usdc,abi:erc20Abi,functionName:'balanceOf',args:address?[address]:undefined,chainId:arc.id,query:{enabled:!!address,refetchInterval:15000}});
- const euroBalance = useReadContract({address:eurc,abi:erc20Abi,functionName:'balanceOf',args:address?[address]:undefined,chainId:arc.id,query:{enabled:!!address}});
+ const euroBalance = useReadContract({address:eurc ?? usdc,abi:erc20Abi,functionName:'balanceOf',args:address?[address]:undefined,chainId:arc.id,query:{enabled:!!address&&!!eurc}});
  async function refreshActivity() {
   if (!address || !client) return;
   setLoadingActivity(true);
@@ -52,7 +56,7 @@ function useWalletState() {
    })); setActivity(rows);
   } catch { toast.error('Could not load recent activity. Try refreshing.'); } finally {setLoadingActivity(false);}
  }
- useEffect(()=>{ if(isConnected){setDemo(false);setActivity([]);void refreshActivity();} },[address,isConnected]);
+ useEffect(()=>{ if(isConnected){setDemo(false);setActivity([]);void refreshActivity();} },[address,isConnected,networkKey]);
  async function connectWallet() {
   if (reownProjectId) {
    try { await openAppKit(); setModal(false); } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not open AppKit.'); }
@@ -64,6 +68,7 @@ function useWalletState() {
  }
  async function connectCircle(register: boolean, username: string) {
   if (circleConnecting) return;
+  if (!network.circle) { setCircleError('Circle passkey wallets are available on Arc Testnet only. Switch to Arc Testnet or use an external wallet.'); return; }
   const usernameError = register ? circleUsernameError(username) : null;
   if (usernameError) { setCircleError(usernameError); return; }
   setCircleError(null);
@@ -89,7 +94,7 @@ function useWalletState() {
  async function convert(amount:string) {
   const units = paymentAmount(amount);
   if(!address){setModal(true);return;}
-  if(!vaultAddress)throw new Error('FX conversion is not configured yet. Deploy a vault with a verified, liquid DEX router first.');
+  if(!vaultAddress||!eurc)throw new Error(`Conversion is not available on ${network.label} yet. Switch to Arc Testnet to try it.`);
   if(!client)throw new Error('Arc is unavailable.');
   setBusy(true);
   try {
@@ -112,7 +117,7 @@ function useWalletState() {
    const events=parseEventLogs({abi:vaultAbi,logs:receipt.logs,eventName:'FXConversion'}); const output=events[0]?.args.amountOut;toast.success(`Conversion confirmed${output?`: ${formatUnits(output,6)} EURC`:''}`);void balance.refetch();void euroBalance.refetch();void refreshActivity();return {hash,output:output?formatUnits(output,6):undefined};
   } finally {setBusy(false);}
  }
- return {address,isConnected,chainId,modal,setModal,connectWallet,connectCircle,circleError,walletKind:circle?'Circle passkey':'External wallet',connecting,disconnect,busy,pay,convert,demo,setDemo,activity,setActivity,refreshActivity,loadingActivity,balance:demo?'2,450.00':balance.data!==undefined?Number(formatUnits(balance.data,6)).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:6}):'—',euroBalance:demo?'428.65':euroBalance.data!==undefined?Number(formatUnits(euroBalance.data,6)).toFixed(2):'—',balanceError:balance.isError};
+ return {network,setNetwork,canConvert:!!vaultAddress&&!!eurc,address,isConnected,chainId,modal,setModal,connectWallet,connectCircle,circleError,walletKind:circle?'Circle passkey':'External wallet',connecting,disconnect,busy,pay,convert,demo,setDemo,activity,setActivity,refreshActivity,loadingActivity,balance:demo?'2,450.00':balance.data!==undefined?Number(formatUnits(balance.data,6)).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:6}):'—',euroBalance:demo?'428.65':!eurc?'—':euroBalance.data!==undefined?Number(formatUnits(euroBalance.data,6)).toFixed(2):'—',balanceError:balance.isError};
 }
 export type WalletState = ReturnType<typeof useWalletState>;
 export function WalletProvider({children}:{children:ReactNode}) { const state=useWalletState();return <WalletContext.Provider value={state}>{children}<WalletDialog/></WalletContext.Provider>; }
@@ -124,9 +129,9 @@ function WalletDialog(){
  return <div className="dialog-backdrop" onClick={()=>w.setModal(false)}><div className="dialog-panel max-h-[90dvh] overflow-y-auto" role="dialog" aria-modal="true" aria-label="Connect wallet" onClick={e=>e.stopPropagation()}>
  <div className="flex justify-between items-center mb-6"><div className="brand-mark"><Wallet size={18}/></div><Button variant="ghost" size="icon" aria-label="Close wallet dialog" onClick={()=>w.setModal(false)}><X/></Button></div>
  <h2 className="text-2xl font-semibold">{w.isConnected?'Your wallet':'Connect your wallet'}</h2>
- {w.isConnected?<><p className="text-sm break-all mt-4 mb-3">{w.address}</p><p className="text-sm text-muted-foreground mb-4">{w.walletKind}</p><div className="flex items-center gap-2 text-success mb-6"><Check size={16}/> Connected to {w.chainId===arc.id?'Arc Testnet':'another network'}</div><Button variant="outline" className="w-full" onClick={()=>{w.disconnect();w.setModal(false);}}>Disconnect wallet</Button></>:<div className="space-y-5 mt-6">
+ {w.isConnected?<><p className="text-sm break-all mt-4 mb-3">{w.address}</p><p className="text-sm text-muted-foreground mb-4">{w.walletKind}</p><div className="flex items-center gap-2 text-success mb-6"><Check size={16}/> Connected to {w.chainId===w.network.chain.id?w.network.label:'another network'}</div><Button variant="outline" className="w-full" onClick={()=>{w.disconnect();w.setModal(false);}}>Disconnect wallet</Button></>:<div className="space-y-5 mt-6">
  <div className="space-y-3"><h3 className="text-sm font-semibold">Circle wallet</h3><label className="text-xs text-muted-foreground" htmlFor="passkey-name">Wallet username</label><Input id="passkey-name" value={username} onChange={e=>setUsername(e.target.value)} placeholder="sunil_kumar" maxLength={50} autoCapitalize="none" autoCorrect="off" spellCheck={false} disabled={!circleClientKey||w.connecting}/><Button className="w-full h-11" disabled={!circleClientKey||w.connecting||!username.trim()} onClick={()=>void w.connectCircle(true,username)}>{w.connecting?<LoaderCircle className="animate-spin"/>:<Wallet/>}Create Circle wallet</Button><Button variant="outline" className="w-full" disabled={!circleClientKey||w.connecting} onClick={()=>void w.connectCircle(false,'')}>Sign in with passkey</Button>{!circleClientKey&&<p className="text-xs text-muted-foreground" role="status">Circle setup pending</p>}</div>
  {w.circleError && <p role="alert" className="text-sm text-destructive break-words">{w.circleError}</p>}
  <div className="border-t border-border pt-5 space-y-3"><h3 className="text-sm font-semibold">External wallet</h3><Button variant="outline" className="w-full h-11" disabled={w.connecting} onClick={()=>void w.connectWallet()}><Wallet/>{reownProjectId?'Connect with AppKit':'Browser wallet'}<ArrowUpRight/></Button>{!reownProjectId&&<p className="text-xs text-muted-foreground" role="status">AppKit setup pending · Browser wallets available</p>}</div>
- </div>}<p className="mt-6 text-xs text-muted-foreground text-center">Testnet only. Never send real funds.</p></div></div>;
+ </div>}<p className="mt-6 text-xs text-muted-foreground text-center">{w.network.real?'Arc Mainnet uses real USDC. Double-check every payment.':'Testnet only. Never send real funds.'}</p></div></div>;
 }
