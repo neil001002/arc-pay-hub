@@ -187,8 +187,23 @@ function useWalletState() {
       void refreshActivity();
     }
   }, [address, isConnected, networkKey]);
-  async function connectWallet() {
+
+  async function connectInjected() {
     const connector = connectors.find((c) => c.id === "injected" || c.id === "metaMask") ?? connectors[0];
+    if (!connector || !(await connector.getProvider())) {
+      toast.error("No browser wallet extension detected.");
+      return;
+    }
+    try {
+      await connectAsync({ connector });
+      setModal(false);
+      toast.success("Wallet connected");
+    } catch {
+      toast.error("Connection was cancelled.");
+    }
+  }
+
+  async function connectWallet() {
     if (reownProjectId) {
       try {
         await openAppKit();
