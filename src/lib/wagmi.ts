@@ -1,8 +1,8 @@
 import { createConfig, http } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import { createClientOnlyFn } from '@tanstack/react-start';
-import { arc } from './arc';
-export const walletConfig = createConfig({ chains:[arc], connectors:[injected()], transports:{[arc.id]:http()}, ssr:true });
+import { arcMainnet, arcTestnet } from './arc';
+export const walletConfig = createConfig({ chains:[arcTestnet, arcMainnet], connectors:[injected()], transports:{[arcTestnet.id]:http(),[arcMainnet.id]:http()}, ssr:true });
 let kitPromise: Promise<ReturnType<typeof import('./appkit').createWalletKit>> | undefined;
 export const initializeAppKit = createClientOnlyFn(() => {
   kitPromise ??= import('./appkit').then(module => module.createWalletKit());
