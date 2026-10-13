@@ -1,9 +1,12 @@
 import { isAddress, parseUnits } from 'viem';
 import { defaultStringifySearch } from '@tanstack/react-router';
+import { parseNetworkKey, type NetworkKey } from './arc';
 export function paymentLinkSearch(search: Record<string, unknown>) {
  const rawAmount = search['amount'];
  return {
   to: typeof search['to'] === 'string' ? search['to'] : '',
+  // Links without a network predate Mainnet support and stay on Arc Testnet.
+  network: parseNetworkKey(search['network']),
   amount: typeof rawAmount === 'string' ? rawAmount : typeof rawAmount === 'number' && Number.isFinite(rawAmount) ? String(rawAmount) : '',
  };
 }
@@ -15,8 +18,8 @@ export function paymentAmount(value: string): bigint {
 }
 export function validRecipient(value: string) { return isAddress(value); }
 export function shortAddress(address: string) { return `${address.slice(0,6)}…${address.slice(-4)}`; }
-export function makePaymentLink(origin: string, address: string, amount: string) {
+export function makePaymentLink(origin: string, address: string, amount: string, network: NetworkKey = 'testnet') {
  if (!validRecipient(address)) throw new Error('A valid recipient wallet is required.');
  paymentAmount(amount);
- return `${origin}/pay${defaultStringifySearch({to:address,amount})}`;
+ return `${origin}/pay${defaultStringifySearch({to:address,amount,network})}`;
 }

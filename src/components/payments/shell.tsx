@@ -2,7 +2,6 @@ import { Link, useRouterState } from '@tanstack/react-router';
 import { LayoutDashboard, ArrowLeftRight, Link2, ArrowUpRight, CircleHelp, ExternalLink, ChevronDown, Command } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WalletButton, useWallet } from './wallet';
-import { arc } from '@/lib/arc';
 import { toast } from 'sonner';
 export function AppShell({children}:{children:React.ReactNode}){
  const path=useRouterState({select:s=>s.location.pathname});const w=useWallet();
