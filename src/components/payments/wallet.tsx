@@ -519,6 +519,14 @@ function WalletDialog() {
             <div className="border-t border-border pt-5 space-y-3">
               <h3 className="text-sm font-semibold">External wallet</h3>
               <Button
+                variant="default"
+                className="w-full h-11"
+                disabled={w.connecting}
+                onClick={() => void connectInjected()}
+              >
+                <Wallet /> Connect Browser Extension (MetaMask)
+              </Button>
+              <Button
                 variant="outline"
                 className="w-full h-11"
                 disabled={w.connecting}
