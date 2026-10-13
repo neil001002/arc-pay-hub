@@ -523,7 +523,7 @@ function WalletDialog() {
                 variant="default"
                 className="w-full h-11"
                 disabled={w.connecting}
-                onClick={() => void connectInjected()}
+                onClick={() => void w.connectInjected()}
               >
                 <Wallet /> Connect Browser Extension (MetaMask)
               </Button>
