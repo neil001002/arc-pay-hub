@@ -16,7 +16,7 @@ export const arcNetworks: Record<NetworkKey, ArcNetwork> = {
     router:(env['VITE_DEX_ROUTER_ADDRESS'] || '0xe27d5d256b370604f1ff060fb489c6a8e3f8a6d9') as Address,
     vault:(env['VITE_VAULT_ADDRESS'] || '0xbe3de044c7c9a2c0a1c7b2d8bb0eb8551ee1ff7c') as Address },
   // Mainnet conversions stay off until an audited vault, router and EURC address are configured.
-  mainnet: { key:'mainnet', label:'Arc Mainnet', chain:arcMainnet, real:true, circle:false,
+  mainnet: { key:'mainnet', label:'Arc Mainnet', chain:arcMainnet, real:true, circle:true,
     eurc:env['VITE_MAINNET_EURC_ADDRESS'] as Address|undefined, router:env['VITE_MAINNET_DEX_ROUTER_ADDRESS'] as Address|undefined, vault:env['VITE_MAINNET_VAULT_ADDRESS'] as Address|undefined },
 };
 export function parseNetworkKey(value: unknown): NetworkKey { return value === 'mainnet' ? 'mainnet' : 'testnet'; }

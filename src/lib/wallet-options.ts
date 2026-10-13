@@ -9,6 +9,11 @@ export function normalizeCircleClientKey(value: string): string {
 // An environment value can override the project's testnet configuration.
 export const circleClientKey =
   normalizeCircleClientKey(import.meta.env["VITE_CIRCLE_CLIENT_KEY"] || "TEST_CLIENT_KEY:8ba07feb9d7e1af3cc7d87c572028ed1:3b0015457b2d7c9700903cb4bf3b2d7a");
+// Arc Mainnet needs a production (LIVE_) Client Key; empty until the owner supplies one.
+export const circleMainnetClientKey = (import.meta.env["VITE_CIRCLE_MAINNET_CLIENT_KEY"] || "").trim();
+export function circleKeyFor(network: "mainnet" | "testnet"): string { return network === "mainnet" ? circleMainnetClientKey : circleClientKey; }
+// Circle's modular transport chain path per network; overridable if Circle names it differently.
+export const circleChainPath = { testnet: "arcTestnet", mainnet: import.meta.env["VITE_CIRCLE_MAINNET_CHAIN_PATH"] || "arc" } as const;
 export const circleClientUrl = "https://modular-sdk.circle.com/v1/rpc/w3s/buidl";
 export function assertPasskeySupport(secure: boolean, supported: boolean) {
   if (!secure || !supported) throw new Error("Circle wallets require a secure browser with passkey support.");

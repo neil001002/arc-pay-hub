@@ -25,10 +25,10 @@ function useWalletState() {
  const [circle, setCircle] = useState<CircleWallet | null>(null);
  const [circleConnecting, setCircleConnecting] = useState(false);
  const [circleError, setCircleError] = useState<string | null>(null);
- const [networkKey,setNetworkKeyState] = useState<NetworkKey>('testnet');
+ const [networkKey,setNetworkKeyState] = useState<NetworkKey>('mainnet');
  const network = arcNetworks[networkKey]; const arc = network.chain; const eurc = network.eurc; const vaultAddress = network.vault;
- useEffect(()=>{ setNetworkKeyState(parseNetworkKey(window.localStorage.getItem('freelancepay-network'))); },[]);
- function setNetwork(key: NetworkKey) { window.localStorage.setItem('freelancepay-network', key); if (key !== networkKey && circle && !arcNetworks[key].circle) { setCircle(null); toast.info('Circle passkey wallets are available on Arc Testnet only.'); } setNetworkKeyState(key); if (external.isConnected && external.chainId !== arcNetworks[key].chain.id) void switchChainAsync({chainId:arcNetworks[key].chain.id}).catch(()=>toast.error('Switch networks in your wallet to continue.')); }
+ useEffect(()=>{ setNetworkKeyState(window.localStorage.getItem('freelancepay-network')==='testnet'?'testnet':'mainnet'); },[]);
+ function setNetwork(key: NetworkKey) { window.localStorage.setItem('freelancepay-network', key); if (key !== networkKey && circle) { setCircle(null); toast.info('Reconnect your Circle wallet on the new network.'); } setNetworkKeyState(key); if (external.isConnected && external.chainId !== arcNetworks[key].chain.id) void switchChainAsync({chainId:arcNetworks[key].chain.id}).catch(()=>toast.error('Switch networks in your wallet to continue.')); }
  const address = circle?.address ?? external.address;
  const isConnected = !!circle || external.isConnected;
  const chainId = circle ? arc.id : external.chainId;
@@ -75,7 +75,7 @@ function useWalletState() {
   setCircleConnecting(true);
   try {
    const { connectCircleWallet } = await import('@/lib/circle-wallet');
-   const wallet = await connectCircleWallet(register, username);
+   const wallet = await connectCircleWallet(register, username, networkKey);
    disconnectExternal(); setCircle(wallet); setModal(false); toast.success('Circle wallet connected');
   } catch (error) { setCircleError(circleConnectionError(error, window.location.hostname)); }
   finally { setCircleConnecting(false); }
