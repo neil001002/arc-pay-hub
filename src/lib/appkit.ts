@@ -1,5 +1,6 @@
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { createAppKit } from "@reown/appkit/react";
+import { walletConnect, injected } from "wagmi/connectors";
 import { arcMainnet, arcTestnet } from "./arc";
 import { reownProjectId } from "./wallet-options";
 
