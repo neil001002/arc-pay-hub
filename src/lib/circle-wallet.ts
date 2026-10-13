@@ -1,8 +1,8 @@
 import { createClientOnlyFn } from '@tanstack/react-start';
 import { createPublicClient, type Address, type Hex } from 'viem';
 import { createBundlerClient, toWebAuthnAccount } from 'viem/account-abstraction';
-import { arcTestnet } from 'viem/chains';
-import { circleClientKey, circleClientUrl, assertPasskeySupport } from './wallet-options';
+import { arcMainnet, arcTestnet } from './arc';
+import { circleKeyFor, circleChainPath, circleClientUrl, assertPasskeySupport } from './wallet-options';
 import { circleUsernameError } from './circle-errors';
 
 // Dynamic imports are moved to the top level but still inside the client-only boundary context
@@ -11,8 +11,10 @@ const getSDK = async () => {
   return import('@circle-fin/modular-wallets-core');
 };
 
-export const connectCircleWallet = createClientOnlyFn(async (register: boolean, username: string) => {
-  if (!circleClientKey) throw new Error('Circle wallets are awaiting the Circle client key.');
+export const connectCircleWallet = createClientOnlyFn(async (register: boolean, username: string, network: 'mainnet' | 'testnet' = 'testnet') => {
+  const circleClientKey = circleKeyFor(network);
+  const chain = network === 'mainnet' ? arcMainnet : arcTestnet;
+  if (!circleClientKey) throw new Error(network === 'mainnet' ? 'Circle wallets on Arc Mainnet are waiting for a production Client Key. Use an external wallet or switch to Arc Testnet for now.' : 'Circle wallets are awaiting the Circle client key.');
   assertPasskeySupport(window.isSecureContext, typeof window.PublicKeyCredential !== 'undefined');
   const usernameError = register ? circleUsernameError(username) : null;
   if (usernameError) throw new Error(usernameError);
@@ -25,10 +27,10 @@ export const connectCircleWallet = createClientOnlyFn(async (register: boolean, 
     ...(register ? { username: username.trim() } : {}),
   });
   // Circle's Arc bundler uses the chain-specific modular transport.
-  const transport = toModularTransport(`${circleClientUrl}/arcTestnet`, circleClientKey);
-  const client = createPublicClient({ chain: arcTestnet, transport });
+  const transport = toModularTransport(`${circleClientUrl}/${circleChainPath[network]}`, circleClientKey);
+  const client = createPublicClient({ chain, transport });
   const account = await toCircleSmartAccount({ client, owner: toWebAuthnAccount({ credential }) });
-  const bundler = createBundlerClient({ account, chain: arcTestnet, transport });
+  const bundler = createBundlerClient({ account, chain, transport });
   return {
     address: account.address,
     async sendCall(to: Address, data: Hex): Promise<Hex> {
