@@ -370,6 +370,7 @@ function useWalletState() {
     chainId,
     modal,
     setModal,
+    connectInjected,
     connectWallet,
     connectCircle,
     circleError,
