@@ -7,6 +7,8 @@ export function compileContracts(extraSources = {}) {
     language: 'Solidity',
     sources: {
       'FreelancePayVault.sol': { content: readFileSync('contracts/FreelancePayVault.sol', 'utf8') },
+      'FreelancePayV4Vault.sol': { content: readFileSync('contracts/FreelancePayV4Vault.sol', 'utf8') },
+      'UniswapV4Types.sol': { content: readFileSync('contracts/UniswapV4Types.sol', 'utf8') },
       ...extraSources,
     },
     settings: {
