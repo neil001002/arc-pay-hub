@@ -29,15 +29,12 @@ contract FreelancePayVault is ReentrancyGuard {
   require(minimumOut > 0,"Minimum output required");
   require(deadline >= block.timestamp,"Expired deadline");
   require(deadline <= block.timestamp + 300,"Deadline too distant");
-  address[] memory path=new address[](2); path[0]=address(USDC);path[1]=targetStablecoin;
   IERC20 target=IERC20(targetStablecoin);
   uint256 beforeBalance=target.balanceOf(address(this));
   uint256 beforeInput=USDC.balanceOf(address(this));
   USDC.safeTransferFrom(msg.sender,address(this),amountUSDC);
   require(USDC.balanceOf(address(this)) == beforeInput + amountUSDC,"Unsupported input transfer");
-  USDC.forceApprove(address(router),amountUSDC);
-  router.swapExactTokensForTokens(amountUSDC,minimumOut,path,address(this),deadline);
-  USDC.forceApprove(address(router),0);
+  _swap(amountUSDC,minimumOut,deadline);
   require(USDC.balanceOf(address(this)) == beforeInput,"Incomplete input spend");
   amountOut=target.balanceOf(address(this))-beforeBalance;
   require(amountOut>=minimumOut,"Insufficient output");
@@ -45,6 +42,13 @@ contract FreelancePayVault is ReentrancyGuard {
   target.safeTransfer(msg.sender,amountOut);
   require(target.balanceOf(msg.sender) == recipientBefore + amountOut,"Unsupported output transfer");
   emit FXConversion(msg.sender,amountUSDC,address(USDC),amountOut,targetStablecoin);
+ }
+ /// @dev The V4 subclass replaces only execution; custody and delivery checks stay shared.
+ function _swap(uint256 amountUSDC,uint256 minimumOut,uint256 deadline) internal virtual {
+  address[] memory path=new address[](2); path[0]=address(USDC);path[1]=localStablecoin;
+  USDC.forceApprove(address(router),amountUSDC);
+  router.swapExactTokensForTokens(amountUSDC,minimumOut,path,address(this),deadline);
+  USDC.forceApprove(address(router),0);
  }
  function forwardUSDC(address to,uint256 amount) external nonReentrant {
   require(to!=address(0) && to!=address(this) && to!=msg.sender && amount>0,"Invalid payment");

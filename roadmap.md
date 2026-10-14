@@ -1,4 +1,6 @@
 # FreelancePay
+- [ ] Add a Uniswap v4 Universal Router converter, quote integration, and local swap-path tests; preserve the deployed Testnet V2 vault.
+- [ ] Verify Mainnet deployment and liquidity before activating conversion — requires official deployment/pool verification and an audited, deployed vault.
 - [x] Fix generated payment links being rejected on the client page; 20 tests pass and browser checks verify copied/opened and existing links, with malformed recipients still rejected.
 - [x] Diagnose repeated Circle failure after console setup; latest requests show duplicate/invalid usernames, now classified with registration validation; 16 tests and browser checks pass.
 - [x] Stabilize wallet context identity during hot updates; pages and wallet dialog verified without runtime errors, regression tests pass.
